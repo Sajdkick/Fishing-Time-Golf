@@ -8,94 +8,133 @@ using OpenCVForUnity;
 
 public class AdvancedRasterMap : MonoBehaviour
 {
+
+    /// <summary>
+    /// Used to fetch tiles from mapbox.
+    /// </summary>
+    class MapboxTileFetcher
+    {
+
+        public delegate void TileCallback(MapboxTileFetcher tileFetcher);
+
+        public RawPngRasterTile tile;
+        public UnwrappedTileId tileID;
+        string mapID;
+
+        /// <summary>
+        /// 0: Uninitialized, 1: Initializing, 2: Initialized, -1: Error.
+        /// </summary>
+        int state = 0;
+        public int GetState() { return state; }
+
+        /// <summary>
+        /// Can we start using the tile?
+        /// </summary>
+        public bool isLoaded = false;
+
+        public void LoadTile(UnwrappedTileId _tileID, string _mapID, TileCallback callback)
+        {
+
+            tile = new RawPngRasterTile();
+            tileID = _tileID;
+            mapID = _mapID;
+
+            state = 1;
+
+            //Here we call the initialize function, this will fetch a tile containing the position provided with the correct zoom.
+            tile.Initialize(MapboxAccess.Instance, tileID.Canonical, mapID, () =>
+            {
+
+                //This function is called upon recieving the tile from map box.
+
+                //We check for errors.
+                if (tile.HasError)
+                {
+
+                    state = -1;
+                    return;
+
+                }
+
+                state = 2;
+                isLoaded = true;
+                
+                if(callback != null)
+                    callback(this);
+
+            });
+
+        }
+        public void LoadTile(float latitude, float longitude, int zoom, string mapID, TileCallback callback)
+        {
+
+            //We convert our Lat/Long into coordinates that can be used in UnwrappedTileID.
+            Vector2d xyCoords = Conversions.LatitudeLongitudeToTileId(latitude, longitude, zoom);
+            UnwrappedTileId tileID = new UnwrappedTileId(zoom, (int)xyCoords.x, (int)xyCoords.y);
+
+            LoadTile(tileID, mapID, callback);
+
+        }
+
+    }
+
 	void Start()
 	{
 
-        LoadHeightTile(56.1612f, 15.5869f, 16);
-        LoadTile(56.1612f, 15.5869f, 16, "mapbox.dark");
+        new MapboxTileFetcher().LoadTile(56.1612f, 15.5869f, 16, "mapbox.dark", CreateQuad);
+        new MapboxTileFetcher().LoadTile(56.1612f, 15.5869f, 16, "mapbox.terrain-rgb", CreateHeightQuad);
 
     }
 
-    void LoadTile(float latitude = 56.1612f, float longitude = 15.5869f, int zoom = 14, string mapID = "mapbox.dark")
+    void CreateQuad(MapboxTileFetcher tileFetcher)
     {
 
-        var pngRasterTile = new RawPngRasterTile();
+        //This function is called upon recieving the tile from map box.
 
-        //We convert our Lat/Long into coordinates that can be used in UnwrappedTileID.
-        Vector2d xyCoords = Conversions.LatitudeLongitudeToTileId(latitude, longitude, zoom);
-        UnwrappedTileId tile = new UnwrappedTileId(zoom, (int)xyCoords.x, (int)xyCoords.y);
+        //We check for errors.
+        if (tileFetcher.tile.HasError)
+            return;
 
-        //Here we call the initialize function, this will fetch a tile containing the position provided with the correct zoom.
-        pngRasterTile.Initialize(MapboxAccess.Instance, tile.Canonical, mapID, () =>
-        {
+        //We create the quad.
+        var tileQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        tileQuad.transform.SetParent(transform);
+        tileQuad.name = tileFetcher.tileID.Canonical.ToString();
+        tileQuad.transform.position = new Vector3(0, 0, 0);
 
-            //This function is called upon recieving the tile from map box.
+        //We create the texture.
+        var texture = new Texture2D(0, 0);
+        texture.LoadImage(tileFetcher.tile.Data);
 
-            //We check for errors.
-            if (pngRasterTile.HasError)
-                return;
-
-            //We create the quad.
-            var tileQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            tileQuad.transform.SetParent(transform);
-            tileQuad.name = tile.Canonical.ToString();
-            tileQuad.transform.position = new Vector3(0, 0, 0);
-
-            //We create the texture.
-            var texture = new Texture2D(0, 0);
-            texture.LoadImage(pngRasterTile.Data);
-
-            //We assign it to the quad.
-            var material = new Material(Shader.Find("Unlit/Texture"));
-            material.mainTexture = texture;
-            tileQuad.GetComponent<MeshRenderer>().sharedMaterial = material;
-
-        });
+        //We assign it to the quad.
+        var material = new Material(Shader.Find("Unlit/Texture"));
+        material.mainTexture = texture;
+        tileQuad.GetComponent<MeshRenderer>().sharedMaterial = material;
 
     }
-
-    /// <summary>
-    /// Creates a tile containing the height value for the position provided.
-    /// </summary>
-    /// <param name="latitude">The latitude of the position</param>
-    /// <param name="longitude">The longitude of the position</param>
-    /// <param name="zoom">The zoom</param>
-    void LoadHeightTile(float latitude = 56.1612f, float longitude = 15.5869f, int zoom = 14)
+    void CreateHeightQuad(MapboxTileFetcher tileFetcher)
     {
 
-        var pngRasterTile = new RawPngRasterTile();
+        //This function is called upon recieving the tile from map box.
 
-        //We convert our Lat/Long into coordinates that can be used in UnwrappedTileID.
-        Vector2d xyCoords = Conversions.LatitudeLongitudeToTileId(latitude, longitude, zoom);
-        UnwrappedTileId tile = new UnwrappedTileId(zoom, (int)xyCoords.x, (int)xyCoords.y);
+        //We check for errors.
+        if (tileFetcher.tile.HasError)
+            return;
 
-        //Here we call the initialize function, this will fetch a tile containing the position provided with the correct zoom.
-        pngRasterTile.Initialize(MapboxAccess.Instance, tile.Canonical, "mapbox.terrain-rgb", () =>
-        {
+        //We create the quad.
+        var tileQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        tileQuad.transform.SetParent(transform);
+        tileQuad.name = tileFetcher.tileID.Canonical.ToString();
+        tileQuad.transform.position = new Vector3(0, 0, 0);
 
-            //This function is called upon recieving the tile from map box.
+        //We create the texture.
+        var texture = new Texture2D(0, 0);
+        texture.LoadImage(tileFetcher.tile.Data);
+        texture = HeightMat_To_Texture2D(TerrainRGB_To_HeightMat(texture));
 
-            //We check for errors.
-            if (pngRasterTile.HasError)
-                return;
-
-            //We create the quad.
-            var tileQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            tileQuad.transform.SetParent(transform);
-            tileQuad.name = tile.Canonical.ToString();
-            tileQuad.transform.position = new Vector3(0, 0, 0);
-
-            //We create the texture.
-            var texture = new Texture2D(0, 0);
-            texture.LoadImage(pngRasterTile.Data);
-            texture = HeightMat_To_Texture2D(TerrainRGB_To_HeightMat(texture));
-
-            //We assign it to the quad.
-            var material = new Material(Shader.Find("Unlit/Texture"));
-            material.mainTexture = texture;
-            tileQuad.GetComponent<MeshRenderer>().sharedMaterial = material;
-
-        });
+        //We assign it to the quad.
+        var material = new Material(Shader.Find("Unlit/Texture"));
+        material.mainTexture = texture;
+        tileQuad.GetComponent<MeshRenderer>().sharedMaterial = material;
 
     }
 
