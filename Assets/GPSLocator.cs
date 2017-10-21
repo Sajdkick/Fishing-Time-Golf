@@ -16,6 +16,7 @@ public class GPSLocator : MonoBehaviour {
     public float water_level;
 
     public GameObject player;
+    GameObject gpsLocationObject;
 
     MapGrid grid;
 
@@ -30,6 +31,12 @@ public class GPSLocator : MonoBehaviour {
         //We initilize the grid.
         Vector2d location = locationProvider.Location;
         grid = new MapGrid((float)location.x, (float)location.y, zoom, mapID, gridSize);
+
+        gpsLocationObject = new GameObject("GPS Location");
+        LerpPosition lerp = player.AddComponent<LerpPosition>();
+        lerp.target = gpsLocationObject;
+        lerp.t = 0.1f;
+        lerp.maxDistance = 10;
 
         //We create the gui
         GameObject canvas = GUIManager.CreateCanvas("Canvas");
@@ -80,11 +87,13 @@ public class GPSLocator : MonoBehaviour {
 
                 }
 
+                gridOutdated = false;
+
             }
 
         }
 
-        player.transform.position = grid.Coordinate_To_Position((float)location.x, (float)location.y);
+        gpsLocationObject.transform.position = grid.Coordinate_To_Position((float)location.x, (float)location.y);
         old_water_level = water_level;
         
     }
