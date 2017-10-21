@@ -6,40 +6,58 @@ using Mapbox.Utils;
 using Mapbox.Unity.Utilities;
 using OpenCVForUnity;
 
-public class MapGrid : MonoBehaviour {
+public class MapGrid {
 
     public string mapID;
-    public float startLatitude;
-    public float startLongitude;
-
-    public GameObject testPlayer;
-    public float TestLatitude;
-    public float TestLongitude;
-
-    public int gridSize;
-    public int zoom;
 
     int actualGridSize;
+    int zoom;
+    bool initialized = false;
 
     TileObject[,] grid;
 
-    // Use this for initialization
-    void Start () {
+    public MapGrid(float latitude, float longitude, int _zoom, string _mapID, int _size)
+    {
 
-        actualGridSize = gridSize;
-        if (Mathf.Floor(gridSize / 2.0f) == gridSize / 2.0f)
+        zoom = _zoom;
+        mapID = _mapID;
+
+        actualGridSize = _size;
+        if (Mathf.Floor(_size / 2.0f) == _size / 2.0f)
             actualGridSize += 1;
 
         grid = new TileObject[actualGridSize, actualGridSize];
 
+        GenerateGrid(latitude, longitude, zoom);
+
+    }
+    public MapGrid(Vector2d coordinates, int _zoom, string _mapID, int _size) : this((float)coordinates.x, (float)coordinates.y, _zoom, _mapID, _size) 
+    {
+
+
+    }
+
+    public void GenerateGrid(float latitude, float longitude, int _zoom)
+    {
+
+        if (TilesLoading() != 0)
+            return;
+
+        //We clear the grid.
+        foreach (TileObject tileObject in grid)
+            if(tileObject != null)
+                tileObject.Destroy();
+
+        zoom = _zoom;
+
         //We convert our Lat/Long into coordinates that can be used in UnwrappedTileID.
-        Vector2d xyCoords = Conversions.LatitudeLongitudeToTileId(startLatitude, startLongitude, zoom);
+        Vector2d xyCoords = Conversions.LatitudeLongitudeToTileId(latitude, longitude, zoom);
         UnwrappedTileId tileID = new UnwrappedTileId(zoom, (int)xyCoords.x, (int)xyCoords.y);
 
         for (int x = 0; x < actualGridSize; x++)
         {
 
-            for(int y = 0; y < actualGridSize; y++)
+            for (int y = 0; y < actualGridSize; y++)
             {
 
                 UnwrappedTileId correctID = tileID;
@@ -68,17 +86,60 @@ public class MapGrid : MonoBehaviour {
 
         }
 
+        initialized = true;
+
     }
 
-    TileObject GetCenterTile()
+    public bool AllTilesLoaded()
+    {
+
+        if (!initialized)
+            return false;
+
+        foreach(TileObject tileObject in grid)
+        {
+
+            if (tileObject.state != 2)
+                return false;
+
+        }
+
+        return true;
+
+    }
+    public int TilesLoading()
+    {
+
+        if (!initialized)
+            return 0;
+
+        int counter = 0;
+        foreach (TileObject tileObject in grid)
+        {
+
+            if (tileObject.state == 1)
+                counter++;
+
+        }
+
+        return counter;
+
+    }
+    public TileObject GetCenterTile()
     {
         return grid[Mathf.FloorToInt(actualGridSize / 2.0f), Mathf.FloorToInt(actualGridSize / 2.0f)];
     }
-    TileObject GetTileFromCenterOffset(int x, int y)
+    public TileObject GetTileFromCenterOffset(int x, int y)
     {
         return grid[Mathf.FloorToInt(actualGridSize / 2.0f) + x, Mathf.FloorToInt(actualGridSize / 2.0f) + y];
     }
-    TileObject GetClosestTile(float latitude, float longitude)
+    public TileObject GetClosestTile(Vector2d coordinates)
+    {
+
+        return GetClosestTile((float)coordinates.x, (float)coordinates.y);
+
+    }
+    public TileObject GetClosestTile(float latitude, float longitude)
     {
 
         Vector2d targetCoords = new Vector2d(latitude, longitude);
@@ -101,7 +162,13 @@ public class MapGrid : MonoBehaviour {
 
     }
 
-    Vector3 Coordinate_To_Position(float latitude, float longitude)
+    public Vector3 Coordinate_To_Position(Vector2d coordinates)
+    {
+
+        return Coordinate_To_Position((float)coordinates.x, (float)coordinates.y);
+
+    }
+    public Vector3 Coordinate_To_Position(float latitude, float longitude)
     {
 
         TileObject closestTile = GetClosestTile(latitude, longitude);
@@ -117,8 +184,11 @@ public class MapGrid : MonoBehaviour {
         
     }
 
-    void ShiftX(int x)
+    public void ShiftX(int x)
     {
+
+        if (x == 0 || !AllTilesLoaded())
+            return;
 
         TileObject[] newTiles = new TileObject[actualGridSize];
 
@@ -126,7 +196,7 @@ public class MapGrid : MonoBehaviour {
         int columnLeaving = 0;
         int direction = -1;
 
-        if (x > 0)
+        if (x < 0)
         {
 
             columnEntering = 0;
@@ -153,7 +223,7 @@ public class MapGrid : MonoBehaviour {
 
         //We destroy the tiles that were moved outside of the grid.
         for (int j = 0; j < actualGridSize; j++)
-            DestroyImmediate(grid[columnLeaving, j].gameObject);
+            grid[columnLeaving, j].Destroy();
 
         //We update the grid position.
         for (int i = columnLeaving; i != columnEntering; i -= direction)
@@ -166,8 +236,11 @@ public class MapGrid : MonoBehaviour {
 
     }
 
-    void ShiftY(int y)
+    public void ShiftY(int y)
     {
+
+        if (y == 0 || !AllTilesLoaded())
+            return;
 
         TileObject[] newTiles = new TileObject[actualGridSize];
 
@@ -175,7 +248,7 @@ public class MapGrid : MonoBehaviour {
         int rowLeaving = 0;
         int direction = -1;
 
-        if (y < 0)
+        if (y > 0)
         {
 
             rowEntering = 0;
@@ -202,7 +275,7 @@ public class MapGrid : MonoBehaviour {
 
         //We destroy the tiles that were moved outside of the grid.
         for (int i = 0; i < actualGridSize; i++)
-            DestroyImmediate(grid[i, rowLeaving].gameObject);
+            grid[i, rowLeaving].Destroy();
 
         //We update the grid position.
         for (int i = 0; i < actualGridSize; i++)
@@ -215,7 +288,7 @@ public class MapGrid : MonoBehaviour {
 
     }
 
-    UnwrappedTileId TileIDFromDirection(UnwrappedTileId tileID, int x, int y)
+    public UnwrappedTileId TileIDFromDirection(UnwrappedTileId tileID, int x, int y)
     {
 
         if (x > 0 && y == 0)
@@ -239,24 +312,4 @@ public class MapGrid : MonoBehaviour {
 
     }
 
-    // Update is called once per frame
-    void Update () {
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-
-            testPlayer.transform.position = Coordinate_To_Position(TestLatitude, TestLongitude);
-            Debug.Log(testPlayer.transform.position);
-        }
-
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-            ShiftY(1);
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-            ShiftY(-1);
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-            ShiftX(1);
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-            ShiftX(-1);
-
-    }
 }

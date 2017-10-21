@@ -10,16 +10,19 @@ public class TileObject : MonoBehaviour {
 
     public Texture2D mapTexture;
     public UnwrappedTileId tileID;
+    public int state;
 
 	// Use this for initialization
 	void Start () {
 
+        state = 0;
 
 	}
 
     public void Load(UnwrappedTileId tileID, string mapID)
     {
 
+        state = 1;
         new TileFetcher().LoadTile(tileID, mapID, CreateTileQuad);
 
     }
@@ -31,7 +34,10 @@ public class TileObject : MonoBehaviour {
 
         //We check for errors.
         if (tileFetcher.tile.HasError)
+        {
+            state = -1;
             return;
+        }
 
         //We create the quad.
         var tileQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -51,6 +57,13 @@ public class TileObject : MonoBehaviour {
         mapTexture = texture;
         tileID = tileFetcher.tileID;
 
-    }
+        state = 2;
 
+    }
+    public void Destroy()
+    {
+
+        DestroyImmediate(gameObject);
+
+    }
 }
