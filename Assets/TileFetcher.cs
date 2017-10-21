@@ -28,17 +28,17 @@ public class TileFetcher
 
     public void LoadTile(UnwrappedTileId _tileID, string _mapID, TileCallback callback)
     {
-
+        
         tile = new RawPngRasterTile();
         tileID = _tileID;
         mapID = _mapID;
-
+        
         state = 1;
 
         //Here we call the initialize function, this will fetch a tile containing the position provided with the correct zoom.
         tile.Initialize(MapboxAccess.Instance, tileID.Canonical, mapID, () =>
         {
-
+            
             //This function is called upon recieving the tile from map box.
 
             //We check for errors.

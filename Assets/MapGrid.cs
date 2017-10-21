@@ -11,6 +11,11 @@ public class MapGrid : MonoBehaviour {
     public string mapID;
     public float startLatitude;
     public float startLongitude;
+
+    public GameObject testPlayer;
+    public float TestLatitude;
+    public float TestLongitude;
+
     public int gridSize;
     public int zoom;
 
@@ -31,7 +36,7 @@ public class MapGrid : MonoBehaviour {
         Vector2d xyCoords = Conversions.LatitudeLongitudeToTileId(startLatitude, startLongitude, zoom);
         UnwrappedTileId tileID = new UnwrappedTileId(zoom, (int)xyCoords.x, (int)xyCoords.y);
 
-        for(int x = 0; x < actualGridSize; x++)
+        for (int x = 0; x < actualGridSize; x++)
         {
 
             for(int y = 0; y < actualGridSize; y++)
@@ -63,6 +68,53 @@ public class MapGrid : MonoBehaviour {
 
         }
 
+    }
+
+    TileObject GetCenterTile()
+    {
+        return grid[Mathf.FloorToInt(actualGridSize / 2.0f), Mathf.FloorToInt(actualGridSize / 2.0f)];
+    }
+    TileObject GetTileFromCenterOffset(int x, int y)
+    {
+        return grid[Mathf.FloorToInt(actualGridSize / 2.0f) + x, Mathf.FloorToInt(actualGridSize / 2.0f) + y];
+    }
+    TileObject GetClosestTile(float latitude, float longitude)
+    {
+
+        Vector2d targetCoords = new Vector2d(latitude, longitude);
+
+        TileObject closestTile = grid[0, 0];
+        double minDistance = double.MaxValue;
+        foreach(TileObject tile in grid)
+        {
+
+            Vector2d coords = Conversions.TileIdToCenterLatitudeLongitude(tile.tileID.X, tile.tileID.Y, tile.tileID.Z);
+            if ((targetCoords - coords).magnitude < minDistance)
+            {
+                closestTile = tile;
+                minDistance = (targetCoords - coords).magnitude;
+            }
+
+        }
+
+        return closestTile;
+
+    }
+
+    Vector3 Coordinate_To_Position(float latitude, float longitude)
+    {
+
+        TileObject closestTile = GetClosestTile(latitude, longitude);
+        UnwrappedTileId closestTileId = closestTile.tileID;
+        Vector2d centerCoords = Conversions.TileIdToCenterLatitudeLongitude(closestTileId.X, closestTileId.Y, closestTileId.Z);
+        Vector2d meterOffset = Conversions.LatLonToMeters(new Vector2d(latitude, longitude)) - Conversions.LatLonToMeters(centerCoords);
+
+        float tileScale = Conversions.GetTileScaleInMeters(latitude, zoom);
+        Vector2d pixelOffset = meterOffset / tileScale;
+        Vector2d worldOffset = pixelOffset / 256.0f;
+
+        return closestTile.transform.position + new Vector3((float)worldOffset.x/2, (float)worldOffset.y/2, 0);
+        
     }
 
     void ShiftX(int x)
@@ -191,7 +243,20 @@ public class MapGrid : MonoBehaviour {
     void Update () {
 
         if (Input.GetKeyDown(KeyCode.Space))
-            ShiftY(1);
+        {
 
-	}
+            testPlayer.transform.position = Coordinate_To_Position(TestLatitude, TestLongitude);
+            Debug.Log(testPlayer.transform.position);
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+            ShiftY(1);
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+            ShiftY(-1);
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+            ShiftX(1);
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+            ShiftX(-1);
+
+    }
 }
