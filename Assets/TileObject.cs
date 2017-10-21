@@ -8,7 +8,9 @@ using OpenCVForUnity;
 
 public class TileObject : MonoBehaviour {
 
-    public Texture2D mapTexture;
+    public Texture2D originalMapTexture;
+    Texture2D displayTexture;
+    public Texture2D DisplayTexture{ get{ return this.displayTexture; } set { displayTexture = value; SetTexture(displayTexture); } }
     public Mat heightMap;
     public GameObject tileQuad;
 
@@ -33,13 +35,11 @@ public class TileObject : MonoBehaviour {
 
     }
 
-    public void SetTexture(Texture2D texture)
+    void SetTexture(Texture2D texture)
     {
 
         //We assign it to the quad.
-        var material = new Material(Shader.Find("Unlit/Texture"));
-        material.mainTexture = texture;
-        tileQuad.GetComponent<MeshRenderer>().sharedMaterial = material;
+        tileQuad.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = texture;
 
     }
 
@@ -65,12 +65,15 @@ public class TileObject : MonoBehaviour {
         var texture = new Texture2D(0, 0);
         texture.LoadImage(tileFetcher.tile.Data);
 
+        originalMapTexture = texture;
+        displayTexture = Instantiate(texture) as Texture2D;
+
         //We assign it to the quad.
         var material = new Material(Shader.Find("Unlit/Texture"));
-        material.mainTexture = texture;
+        material.mainTexture = displayTexture;
         tileQuad.GetComponent<MeshRenderer>().sharedMaterial = material;
 
-        mapTexture = texture;
+
         tileID = tileFetcher.tileID;
 
         state = 2;

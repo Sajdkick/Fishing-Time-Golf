@@ -41,27 +41,14 @@ public class GPSLocator : MonoBehaviour {
         if (grid.AllTilesLoaded())
         {
 
-            if (gridOutdated)
+            if (gridOutdated || old_water_level != water_level)
             {
 
                 TileObject[,] allTiles = grid.GetAllTiles();
                 foreach (TileObject tile in allTiles)
                 {
 
-                    tile.SetTexture(FillWater(tile.mapTexture, tile.heightMap, water_level));
-
-                }
-
-            }
-
-            if (old_water_level != water_level)
-            {
-
-                TileObject[,] allTiles = grid.GetAllTiles();
-                foreach (TileObject tile in allTiles)
-                {
-
-                    tile.SetTexture(FillWater(tile.mapTexture, tile.heightMap, water_level));
+                    FillWater(tile, water_level);
 
                 }
 
@@ -73,23 +60,24 @@ public class GPSLocator : MonoBehaviour {
         
     }
 
-    Texture2D FillWater(Texture2D mapTexture, Mat heightMap, float waterLevel)
+    void FillWater(TileObject tile, float waterLevel)
     {
 
         //We convert to a mat
-        Mat mapMat = new Mat(new Size(mapTexture.width, mapTexture.height), CvType.CV_8UC3);
-        Utils.texture2DToMat(mapTexture, mapMat);
+        Mat mapMat = new Mat(new Size(tile.DisplayTexture.width, tile.DisplayTexture.height), CvType.CV_8UC3);
+        Utils.texture2DToMat(tile.originalMapTexture, mapMat);
 
         Mat waterRegion = new Mat();
-        Core.compare(heightMap, new Scalar(waterLevel), waterRegion, Core.CMP_LT);
+        Core.compare(tile.heightMap, new Scalar(waterLevel), waterRegion, Core.CMP_LT);
 
         mapMat.setTo(new Scalar(0, 0, 255), waterRegion);
 
         //we convert it into a texture.
-        Texture2D filledMapTexture = new Texture2D(mapMat.width(), mapMat.height());
-        Utils.matToTexture2D(mapMat, filledMapTexture);
+        tile.DisplayTexture.Resize(mapMat.width(), mapMat.height());
+        Utils.matToTexture2D(mapMat, tile.DisplayTexture);
 
-        return filledMapTexture;
+        mapMat.release();
+        waterRegion.release();
 
     }
 
