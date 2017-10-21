@@ -13,6 +13,8 @@ public class GPSLocator : MonoBehaviour {
     public string mapID;
     public int gridSize;
 
+    public float water_level;
+
     public GameObject player;
 
     MapGrid grid;
@@ -25,39 +27,70 @@ public class GPSLocator : MonoBehaviour {
         Vector2d location = locationProvider.Location;
         grid = new MapGrid((float)location.x, (float)location.y, zoom, mapID, gridSize);
     }
-	
+
+    float old_water_level = 0;
+    bool gridOutdated = false;
 	// Update is called once per frame
 	void Update () {
+
         Vector2d location = locationProvider.Location;
-        if (Input.GetKeyDown(KeyCode.Space))
-            grid.GenerateGrid(56.182f, 15.59f, zoom);
+
+        if (grid.UpdateGrid((float)location.x, (float)location.y))
+            gridOutdated = true;
 
         if (grid.AllTilesLoaded())
         {
 
-            UnwrappedTileId closestTileId = grid.GetClosestTile((float)location.x, (float)location.y).tileID;
-            UnwrappedTileId centerTileId = grid.GetCenterTile().tileID;
-
-            if (closestTileId.X != centerTileId.X || closestTileId.Y != centerTileId.Y)
+            if (gridOutdated)
             {
 
-                int x = closestTileId.X - centerTileId.X;
-                int y = closestTileId.Y - centerTileId.Y;
-
-                if (Mathf.Abs(x) > 1 || Mathf.Abs(y) > 1)
-                    grid.GenerateGrid((float)location.x, (float)location.y, zoom);
-                else
+                TileObject[,] allTiles = grid.GetAllTiles();
+                foreach (TileObject tile in allTiles)
                 {
 
-                    grid.ShiftX(x);
-                    grid.ShiftY(y);
+                    tile.SetTexture(FillWater(tile.mapTexture, tile.heightMap, water_level));
 
                 }
 
             }
 
-            player.transform.position = grid.Coordinate_To_Position((float)location.x, (float)location.y);
+            if (old_water_level != water_level)
+            {
+
+                TileObject[,] allTiles = grid.GetAllTiles();
+                foreach (TileObject tile in allTiles)
+                {
+
+                    tile.SetTexture(FillWater(tile.mapTexture, tile.heightMap, water_level));
+
+                }
+
+            }
 
         }
+
+        player.transform.position = grid.Coordinate_To_Position((float)location.x, (float)location.y);
+        
     }
+
+    Texture2D FillWater(Texture2D mapTexture, Mat heightMap, float waterLevel)
+    {
+
+        //We convert to a mat
+        Mat mapMat = new Mat(new Size(mapTexture.width, mapTexture.height), CvType.CV_8UC3);
+        Utils.texture2DToMat(mapTexture, mapMat);
+
+        Mat waterRegion = new Mat();
+        Core.compare(heightMap, new Scalar(waterLevel), waterRegion, Core.CMP_LT);
+
+        mapMat.setTo(new Scalar(0, 0, 255), waterRegion);
+
+        //we convert it into a texture.
+        Texture2D filledMapTexture = new Texture2D(mapMat.width(), mapMat.height());
+        Utils.matToTexture2D(mapMat, filledMapTexture);
+
+        return filledMapTexture;
+
+    }
+
 }

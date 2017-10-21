@@ -10,6 +10,8 @@ public class TileObject : MonoBehaviour {
 
     public Texture2D mapTexture;
     public Mat heightMap;
+    public GameObject tileQuad;
+
     public UnwrappedTileId tileID;
     public int state;
 
@@ -31,6 +33,16 @@ public class TileObject : MonoBehaviour {
 
     }
 
+    public void SetTexture(Texture2D texture)
+    {
+
+        //We assign it to the quad.
+        var material = new Material(Shader.Find("Unlit/Texture"));
+        material.mainTexture = texture;
+        tileQuad.GetComponent<MeshRenderer>().sharedMaterial = material;
+
+    }
+
     public void CreateTileQuad(TileFetcher tileFetcher)
     {
 
@@ -44,7 +56,7 @@ public class TileObject : MonoBehaviour {
         }
 
         //We create the quad.
-        var tileQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        tileQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
         tileQuad.name = tileFetcher.tileID.Canonical.ToString();
         tileQuad.transform.parent = transform;
         tileQuad.transform.localPosition = new Vector3(0, 0, 0);

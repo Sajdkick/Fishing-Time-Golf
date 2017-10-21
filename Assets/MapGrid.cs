@@ -31,12 +31,42 @@ public class MapGrid {
         GenerateGrid(latitude, longitude, zoom);
 
     }
-    public MapGrid(Vector2d coordinates, int _zoom, string _mapID, int _size) : this((float)coordinates.x, (float)coordinates.y, _zoom, _mapID, _size) 
+    public MapGrid(Vector2d coordinates, int _zoom, string _mapID, int _size) : this((float)coordinates.x, (float)coordinates.y, _zoom, _mapID, _size) { }
+
+    public bool UpdateGrid(float latitude, float longitude)
     {
 
+        if (AllTilesLoaded())
+        {
+
+            UnwrappedTileId closestTileId = GetClosestTile(latitude, longitude).tileID;
+            UnwrappedTileId centerTileId = GetCenterTile().tileID;
+
+            if (closestTileId.X != centerTileId.X || closestTileId.Y != centerTileId.Y)
+            {
+
+                int x = closestTileId.X - centerTileId.X;
+                int y = closestTileId.Y - centerTileId.Y;
+
+                if (Mathf.Abs(x) > 1 || Mathf.Abs(y) > 1)
+                    GenerateGrid(latitude, longitude, zoom);
+                else
+                {
+
+                    ShiftX(x);
+                    ShiftY(y);
+
+                }
+
+                return true;
+
+            }
+
+        }
+
+        return false;
 
     }
-
     public void GenerateGrid(float latitude, float longitude, int _zoom)
     {
 
@@ -161,6 +191,10 @@ public class MapGrid {
         return closestTile;
 
     }
+    public TileObject[,] GetAllTiles()
+    {
+        return grid;
+    }
 
     public Vector3 Coordinate_To_Position(Vector2d coordinates)
     {
@@ -235,7 +269,6 @@ public class MapGrid {
             grid[columnEntering, j] = newTiles[j];
 
     }
-
     public void ShiftY(int y)
     {
 
