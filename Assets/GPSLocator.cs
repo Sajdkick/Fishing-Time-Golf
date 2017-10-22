@@ -114,8 +114,49 @@ public class GPSLocator : MonoBehaviour {
         tile.DisplayTexture.Resize(mapMat.width(), mapMat.height());
         Utils.matToTexture2D(mapMat, tile.DisplayTexture);
 
+        Vector3 tileCorner = tile.transform.position - Vector3.right * 0.5f - Vector3.up * 0.5f;
+        Random.InitState(tile.tileID.GetHashCode());
+
+        //We remove all the obstacles.
+        for(int i = 0; i < tile.tileQuad.transform.childCount; i++)
+            Destroy(tile.tileQuad.transform.GetChild(i).gameObject);
+
+        Core.transpose(mapMat, mapMat);
+        //We generate all the obstacles.
+        for(int i = 0; i < 20; i++)
+        {
+
+            int x = Random.Range(0, 255);
+            int y = Random.Range(0, 255);
+
+            byte[] matElement = new byte[3];
+            mapMat.get(x, y, matElement);
+            if(matElement[0] == 0 && matElement[1] == 0 && matElement[2] == 255)
+            {
+
+                SpawnObstacle(tile, tileCorner + new Vector3(x / 255.0f, 1 - (y / 255.0f), 0));
+
+            }
+
+        }
+
         mapMat.release();
         waterRegion.release();
+
+    }
+
+    void SpawnObstacle(TileObject tile, Vector3 position)
+    {
+
+        GameObject obstacle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        obstacle.transform.position = position;
+        obstacle.transform.localScale *= 0.05f;
+        obstacle.transform.parent = tile.tileQuad.transform;
+
+        Rigidbody rigidbody = obstacle.AddComponent<Rigidbody>();
+        rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        rigidbody.useGravity = false;
+        rigidbody.isKinematic = true;
 
     }
 
