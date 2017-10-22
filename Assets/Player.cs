@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
+    static GameObject activeBall;
+    static public GameObject GetActiveBall() { return activeBall; }
+
+    static int score = 0;
+    static public void GivePoint(int point) { score += point; }
+
     LineRenderer lineRenderer;
 
 	// Use this for initialization
@@ -26,7 +32,7 @@ public class Player : MonoBehaviour {
 
         float cameraDistance = Mathf.Abs(Camera.main.transform.position.z);
 
-        if (!charging && Input.GetMouseButtonDown(0))
+        if (!charging && Input.GetMouseButtonDown(0) && activeBall == null)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -89,6 +95,8 @@ public class Player : MonoBehaviour {
         rigidbody.useGravity = false;
 
         ball.AddComponent<Ball>();
+   
+        activeBall = ball;
 
     }
 

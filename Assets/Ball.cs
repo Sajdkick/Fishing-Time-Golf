@@ -6,10 +6,12 @@ public class Ball : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+
+        gameObject.tag = "ball";
+
 	}
 
-    float lifetime = 10;
+    float lifetime = 4;
 	// Update is called once per frame
 	void Update () {
 

@@ -170,6 +170,7 @@ public class GPSLocator : MonoBehaviour {
         {
 
             waterObject.GetComponent<MeshRenderer>().material = schoolMaterial;
+            waterObject.AddComponent<School>();
 
         }
         else
