@@ -58,7 +58,7 @@ public class CameraController : MonoBehaviour {
             touchCount = 0;
 
         //We handle input differently on mobile and desktop.
-        if (Application.isMobilePlatform || Input.touchSupported)
+        if (Application.isMobilePlatform)
         {
             if (touchCount == 1)
             {
@@ -86,7 +86,6 @@ public class CameraController : MonoBehaviour {
     /// </summary>
     void Drag()
     {
-        Debug.Log(drag && Input.GetMouseButton(0));
         //If we pressed down this frame (GetMouseButtonDown also works for touch input)
         if (!drag && Input.GetMouseButtonDown(0))
         {
@@ -206,7 +205,7 @@ public class CameraController : MonoBehaviour {
     void Rotate()
     {
         //Check count touches
-        if (Input.touchCount > 1)
+        if (Input.touchCount > 0)
         {
             //Touch began, save position
             if (Input.GetTouch(0).phase == TouchPhase.Began)
