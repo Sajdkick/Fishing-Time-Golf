@@ -12,7 +12,7 @@ public class Player : MonoBehaviour {
         lineRenderer = gameObject.AddComponent<LineRenderer>();
         lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
         lineRenderer.material.color = Color.green;
-        lineRenderer.widthMultiplier = 0.2f;
+        lineRenderer.widthMultiplier = 0.1f;
         lineRenderer.positionCount = 2;
 
         lineRenderer.SetPosition(0, Vector3.zero);
@@ -24,25 +24,32 @@ public class Player : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        float cameraDistance = Mathf.Abs(Camera.main.transform.position.z);
+
         if (!charging && Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            
-            if (Physics.Raycast(ray, out hit))
+
+            int layer_mask = LayerMask.GetMask("Player");
+            if (Physics.Raycast(ray, out hit, layer_mask))
             {
-                
                 if (hit.transform.gameObject.name == gameObject.name)
                     charging = true;
             }
 
         }
-        if (charging && Input.GetMouseButton(0))
+        if ( Input.GetMouseButton(0))
         {
 
-            lineRenderer.SetPosition(0, transform.position);
-            Vector3 pos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 1.9f));
-            lineRenderer.SetPosition(1, pos);
+            if (charging)
+            {
+
+                lineRenderer.SetPosition(0, transform.position);
+                Vector3 pos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance - 0.1f));
+                lineRenderer.SetPosition(1, pos);
+
+            }
 
         }
 
@@ -53,7 +60,8 @@ public class Player : MonoBehaviour {
             lineRenderer.SetPosition(1, Vector3.zero);
             charging = false;
 
-            Shoot(transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 2f)), Vector3.Distance(transform.position, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 2f))) * 100);
+            Vector3 targetPos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance));
+            Shoot(targetPos - transform.position, Vector3.Distance(transform.position, targetPos) * 3);
 
         }
 
@@ -63,6 +71,10 @@ public class Player : MonoBehaviour {
     {
 
         GameObject ball = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        ball.transform.position = transform.position;
+        ball.transform.localScale = transform.localScale * 0.5f;
+        Physics.IgnoreCollision(ball.GetComponent<SphereCollider>(), GetComponent<SphereCollider>());
+
         Rigidbody rigidbody = ball.AddComponent<Rigidbody>();
         rigidbody.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
         rigidbody.AddForce(direction.normalized * force,ForceMode.Impulse);
