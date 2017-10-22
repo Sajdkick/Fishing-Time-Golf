@@ -9,6 +9,7 @@ public class Player : MonoBehaviour {
 
     static int score = 0;
     static public void GivePoint(int point) { score += point; }
+    static public int GetScore() { return score; }
 
     LineRenderer lineRenderer;
 

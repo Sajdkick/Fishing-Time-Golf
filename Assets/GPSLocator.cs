@@ -6,6 +6,7 @@ using Mapbox.Unity.Location;
 using Mapbox.Utils;
 using Mapbox.Unity.Utilities;
 using OpenCVForUnity;
+using UnityEngine.UI;
 
 public class GPSLocator : MonoBehaviour {
 
@@ -21,6 +22,9 @@ public class GPSLocator : MonoBehaviour {
     MapGrid grid;
 
     ILocationProvider locationProvider;
+
+    Text waterLevelText;
+    Text scoreText;
 
     Material obstacleMaterial;
     Material schoolMaterial;
@@ -49,6 +53,9 @@ public class GPSLocator : MonoBehaviour {
         Texture2D up = Resources.Load<Texture2D>("UI Elements/Black/2x/up");
         GUIManager.CreateButton(canvas, 0.1f, 0.55f, 0.1f, 0.1f, up, "Down Up", (data) => RiseWaterLevel(data));
 
+        waterLevelText = GUIManager.CreateText(canvas, 0.1f, 0.4f, 0.1f, 0.2f, water_level.ToString("0.00"), "Water Level", "LemonMilkbold", 15).GetComponent<Text>();
+        scoreText = GUIManager.CreateText(canvas, 0.5f, 0.85f, 0.1f, 0.2f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
+
         obstacleMaterial = new Material(Shader.Find("Unlit/Color"));
         obstacleMaterial.color = Color.black;
         schoolMaterial = new Material(Shader.Find("Unlit/Color"));
@@ -61,6 +68,7 @@ public class GPSLocator : MonoBehaviour {
 
         water_level -= 1 + water_level * 0.1f;
         water_level = Mathf.Clamp(water_level, 0, 1000);
+        waterLevelText.text = water_level.ToString("0.00");
 
     }
     void RiseWaterLevel(UnityEngine.EventSystems.PointerEventData data)
@@ -68,6 +76,7 @@ public class GPSLocator : MonoBehaviour {
 
         water_level += 1 + water_level * 0.1f;
         water_level = Mathf.Clamp(water_level, 0, 1000);
+        waterLevelText.text = water_level.ToString("0.00");
 
     }
 
@@ -75,6 +84,8 @@ public class GPSLocator : MonoBehaviour {
     bool gridOutdated = false;
 	// Update is called once per frame
 	void Update () {
+
+        scoreText.text = Player.GetScore().ToString();
 
         Vector2d location = locationProvider.Location;
 
