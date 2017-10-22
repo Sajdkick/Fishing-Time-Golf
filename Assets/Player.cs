@@ -32,10 +32,17 @@ public class Player : MonoBehaviour {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             int layer_mask = LayerMask.GetMask("Player");
+            //layer_mask = ~layer_mask;
             if (Physics.Raycast(ray, out hit, layer_mask))
             {
                 if (hit.transform.gameObject.name == gameObject.name)
+                {
+
                     charging = true;
+                    Camera.main.GetComponent<CameraController>().enabled = false;
+
+                }
+                    
             }
 
         }
@@ -58,6 +65,7 @@ public class Player : MonoBehaviour {
 
             lineRenderer.SetPosition(0, Vector3.zero);
             lineRenderer.SetPosition(1, Vector3.zero);
+            Camera.main.GetComponent<CameraController>().enabled = true;
             charging = false;
 
             Vector3 targetPos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance));

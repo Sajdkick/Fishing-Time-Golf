@@ -22,8 +22,11 @@ public class GPSLocator : MonoBehaviour {
 
     ILocationProvider locationProvider;
 
-	// Use this for initialization
-	void Start () {
+    Material obstacleMaterial;
+    Material schoolMaterial;
+
+    // Use this for initialization
+    void Start () {
 
         //We initialize the locationProvider.
         locationProvider = LocationProviderFactory.Instance.DefaultLocationProvider;
@@ -45,6 +48,11 @@ public class GPSLocator : MonoBehaviour {
         GUIManager.CreateButton(canvas, 0.1f, 0.25f, 0.1f, 0.1f, down, "Down Button", (data) => LowerWaterLevel(data));
         Texture2D up = Resources.Load<Texture2D>("UI Elements/Black/2x/up");
         GUIManager.CreateButton(canvas, 0.1f, 0.55f, 0.1f, 0.1f, up, "Down Up", (data) => RiseWaterLevel(data));
+
+        obstacleMaterial = new Material(Shader.Find("Unlit/Color"));
+        obstacleMaterial.color = Color.black;
+        schoolMaterial = new Material(Shader.Find("Unlit/Color"));
+        schoolMaterial.color = Color.yellow;
 
     }
 
@@ -134,7 +142,7 @@ public class GPSLocator : MonoBehaviour {
             if(matElement[0] == 0 && matElement[1] == 0 && matElement[2] == 255)
             {
 
-                SpawnObstacle(tile, tileCorner + new Vector3(x / 255.0f, 1 - (y / 255.0f), 0));
+                SpawnWaterObject(tile, tileCorner + new Vector3(x / 255.0f, 1 - (y / 255.0f), 0));
 
             }
 
@@ -145,18 +153,31 @@ public class GPSLocator : MonoBehaviour {
 
     }
 
-    void SpawnObstacle(TileObject tile, Vector3 position)
+    void SpawnWaterObject(TileObject tile, Vector3 position)
     {
 
-        GameObject obstacle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        obstacle.transform.position = position;
-        obstacle.transform.localScale *= 0.05f;
-        obstacle.transform.parent = tile.tileQuad.transform;
+        GameObject waterObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        waterObject.transform.position = position;
+        waterObject.transform.localScale *= 0.05f;
+        waterObject.transform.parent = tile.tileQuad.transform;
 
-        Rigidbody rigidbody = obstacle.AddComponent<Rigidbody>();
+        Rigidbody rigidbody = waterObject.AddComponent<Rigidbody>();
         rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         rigidbody.useGravity = false;
         rigidbody.isKinematic = true;
+
+        if (Random.Range(1, 10) == 9)
+        {
+
+            waterObject.GetComponent<MeshRenderer>().material = schoolMaterial;
+
+        }
+        else
+        {
+
+            waterObject.GetComponent<MeshRenderer>().material = obstacleMaterial;
+
+        }
 
     }
 
