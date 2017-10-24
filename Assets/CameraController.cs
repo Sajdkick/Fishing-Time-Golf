@@ -39,6 +39,7 @@ public class CameraController : MonoBehaviour {
 
     //Internal variables used for calculations.
     Vector3 oldMousePosition;
+    Vector3 oldCameraPosition;
     int touchCount = 0;
     bool drag = false;
 
@@ -146,10 +147,21 @@ public class CameraController : MonoBehaviour {
             //We set the position.
             transform.position = new Vector3(X, Y, transform.position.z);
 
+            if(pivotObject != null)
+            {
+
+                Vector3 pivotInViewport = GetComponent<Camera>().WorldToViewportPoint(pivotObject.transform.position);
+                if (pivotInViewport.x > 1 || pivotInViewport.x < 0 || pivotInViewport.y > 1 || pivotInViewport.y < 0)
+                    transform.position = oldCameraPosition;
+
+            }
+
         }
         //If we let go, we stop dragging.
         else if (drag && Input.GetMouseButtonUp(0))
             drag = false;
+
+        oldCameraPosition = transform.position;
 
     }
 
