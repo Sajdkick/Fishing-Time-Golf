@@ -20,6 +20,8 @@ public class Player : MonoBehaviour {
         lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
         lineRenderer.material.color = Color.green;
         lineRenderer.widthMultiplier = 0.075f;
+        lineRenderer.startWidth = 0.075f;
+        lineRenderer.endWidth = 0;
         lineRenderer.positionCount = 2;
 
         lineRenderer.SetPosition(0, Vector3.zero);
@@ -28,6 +30,7 @@ public class Player : MonoBehaviour {
     }
 
     bool charging = false;
+    float chargeMeter = 0;
 	// Update is called once per frame
 	void Update () {
 
@@ -85,7 +88,13 @@ public class Player : MonoBehaviour {
 
                 lineRenderer.SetPosition(0, transform.position);
                 Vector3 pos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance - 0.1f));
-                lineRenderer.SetPosition(1, pos);
+
+                chargeMeter = Mathf.Clamp(Vector3.Distance(transform.position, pos), 0, 0.5f);
+
+                Color chargeColor = Color.Lerp(Color.green, Color.red, chargeMeter / 0.5f);
+
+                lineRenderer.material.color = chargeColor;
+                lineRenderer.SetPosition(1, transform.position + (pos - transform.position).normalized * chargeMeter);
 
             }
 
@@ -100,7 +109,7 @@ public class Player : MonoBehaviour {
             charging = false;
 
             Vector3 targetPos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance));
-            Shoot(targetPos - transform.position, Vector3.Distance(transform.position, targetPos) * 3);
+            Shoot(targetPos - transform.position, chargeMeter * 6);
 
         }
 

@@ -32,7 +32,7 @@ public class School : MonoBehaviour {
 
             float diceRoll = Random.value;
             float threshold = Mathf.Lerp(0, fleeChance, 1 - (minDistance / 0.3f));
-            Debug.Log(diceRoll + " : " + threshold);
+
             if (diceRoll < threshold)
                 Remove();
 
