@@ -60,7 +60,7 @@ public class TileObject : MonoBehaviour {
         tileQuad.name = tileFetcher.tileID.Canonical.ToString();
         tileQuad.transform.parent = transform;
         tileQuad.transform.localPosition = new Vector3(0, 0, 0);
-        Destroy(tileQuad.GetComponent<MeshCollider>());
+        tileQuad.layer = 9;
 
         //We create the texture.
         var texture = new Texture2D(0, 0);

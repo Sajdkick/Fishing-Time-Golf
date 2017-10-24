@@ -19,7 +19,7 @@ public class Player : MonoBehaviour {
         lineRenderer = gameObject.AddComponent<LineRenderer>();
         lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
         lineRenderer.material.color = Color.green;
-        lineRenderer.widthMultiplier = 0.1f;
+        lineRenderer.widthMultiplier = 0.075f;
         lineRenderer.positionCount = 2;
 
         lineRenderer.SetPosition(0, Vector3.zero);
@@ -45,8 +45,32 @@ public class Player : MonoBehaviour {
                 if (hit.transform.gameObject.name == gameObject.name)
                 {
 
-                    charging = true;
-                    Camera.main.GetComponent<CameraController>().enabled = false;
+                    if(Physics.Raycast(transform.position + -Vector3.forward, Vector3.forward, out hit, 10, ~layer_mask))
+                    {
+
+                        if(hit.collider.gameObject.layer == 9)
+                        {
+
+                            Renderer rend = hit.transform.GetComponent<Renderer>();
+                            MeshCollider meshCollider = hit.transform.GetComponent<MeshCollider>();
+
+                            Texture2D tex = rend.material.mainTexture as Texture2D;
+                            Vector3 pixelUV = hit.textureCoord;
+                            pixelUV.x *= tex.width;
+                            pixelUV.y *= tex.height;
+
+                            Color color = tex.GetPixel((int)pixelUV.x, (int)pixelUV.y);
+                            if(color != Color.blue)
+                            {
+
+                                charging = true;
+                                Camera.main.GetComponent<CameraController>().enabled = false;
+
+                            }
+
+                        }
+
+                    }
 
                 }
                     
