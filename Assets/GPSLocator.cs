@@ -46,11 +46,11 @@ public class GPSLocator : MonoBehaviour {
         GameObject canvas = GUIManager.CreateCanvas("Canvas");
 
         Texture2D down = Resources.Load<Texture2D>("UI Elements/Black/2x/down");
-        GUIManager.CreateButton(canvas, 0.1f, 0.25f, 0.1f, 0.1f, down, "Down Button", (data) => LowerWaterLevel(data));
+        GUIManager.CreateButton(canvas, 0.15f, 0.25f, 0.1f, 0.1f, down, "Down Button", (data) => LowerWaterLevel(data));
         Texture2D up = Resources.Load<Texture2D>("UI Elements/Black/2x/up");
-        GUIManager.CreateButton(canvas, 0.1f, 0.55f, 0.1f, 0.1f, up, "Down Up", (data) => RiseWaterLevel(data));
+        GUIManager.CreateButton(canvas, 0.15f, 0.55f, 0.1f, 0.1f, up, "Down Up", (data) => RiseWaterLevel(data));
 
-        waterLevelText = GUIManager.CreateText(canvas, 0.1f, 0.4f, 0.1f, 0.1f, water_level.ToString("0.00"), "Water Level", "LemonMilkbold", 15).GetComponent<Text>();
+        waterLevelText = GUIManager.CreateText(canvas, 0.15f, 0.4f, 0.1f, 0.1f, water_level.ToString("0.00"), "Water Level", "LemonMilkbold", 15).GetComponent<Text>();
         scoreText = GUIManager.CreateText(canvas, 0.5f, 0.85f, 0.1f, 0.2f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
 
     }

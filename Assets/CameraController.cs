@@ -63,7 +63,7 @@ public class CameraController : MonoBehaviour {
             touchCount = 0;
 
         //We handle input differently on mobile and desktop.
-        if (Application.isMobilePlatform || Input.touchSupported)
+        if (Application.isMobilePlatform)
         {
             if (touchCount == 1)
             {
@@ -101,7 +101,7 @@ public class CameraController : MonoBehaviour {
 
             //We cast a ray that intersects with everything but the background.
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            LayerMask mask = 1 << 8;
+            LayerMask mask = 1 << 9;
             mask = ~mask;
 
             //If we didn't collide with anything, we know we want to start dragging.
