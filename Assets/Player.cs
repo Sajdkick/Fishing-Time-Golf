@@ -55,8 +55,6 @@ public class Player : MonoBehaviour {
                         {
 
                             Renderer rend = hit.transform.GetComponent<Renderer>();
-                            MeshCollider meshCollider = hit.transform.GetComponent<MeshCollider>();
-
                             Texture2D tex = rend.material.mainTexture as Texture2D;
                             Vector3 pixelUV = hit.textureCoord;
                             pixelUV.x *= tex.width;
