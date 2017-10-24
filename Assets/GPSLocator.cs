@@ -23,7 +23,7 @@ public class GPSLocator : MonoBehaviour {
 
     ILocationProvider locationProvider;
 
-    Text waterLevelText;
+    InputField waterLevelText;
     Text scoreText;
 
     // Use this for initialization
@@ -45,12 +45,12 @@ public class GPSLocator : MonoBehaviour {
         //We create the gui
         GameObject canvas = GUIManager.CreateCanvas("Canvas");
 
-        Texture2D down = Resources.Load<Texture2D>("UI Elements/Black/2x/down");
-        GUIManager.CreateButton(canvas, 0.15f, 0.25f, 0.1f, 0.1f, down, "Down Button", (data) => LowerWaterLevel(data));
-        Texture2D up = Resources.Load<Texture2D>("UI Elements/Black/2x/up");
-        GUIManager.CreateButton(canvas, 0.15f, 0.55f, 0.1f, 0.1f, up, "Down Up", (data) => RiseWaterLevel(data));
+        Texture2D down = Resources.Load<Texture2D>("UI Elements/Black/2x/left");
+        GUIManager.CreateButton(canvas, 0.15f, 0.15f, 0.1f, 0.1f, down, "Left Button", (data) => LowerWaterLevel(data));
+        Texture2D up = Resources.Load<Texture2D>("UI Elements/Black/2x/right");
+        GUIManager.CreateButton(canvas, 0.85f, 0.15f, 0.1f, 0.1f, up, "Right Button", (data) => RiseWaterLevel(data));
 
-        waterLevelText = GUIManager.CreateText(canvas, 0.15f, 0.4f, 0.1f, 0.1f, water_level.ToString("0.00"), "Water Level", "LemonMilkbold", 15).GetComponent<Text>();
+        waterLevelText = GUIManager.CreateInputTextfield(canvas, 0.5f, 0.15f, 0.3f, 0.1f, "Water Level", water_level.ToString("0.00"), "LemonMilkbold").GetComponent<InputField>();
         scoreText = GUIManager.CreateText(canvas, 0.5f, 0.85f, 0.1f, 0.2f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
 
     }
@@ -60,7 +60,7 @@ public class GPSLocator : MonoBehaviour {
 
         water_level -= 1 + water_level * 0.1f;
         water_level = Mathf.Clamp(water_level, 0, 1000);
-        waterLevelText.text = water_level.ToString("0.00");
+        waterLevelText.text = water_level.ToString("0");
 
     }
     void RiseWaterLevel(UnityEngine.EventSystems.PointerEventData data)
@@ -68,7 +68,7 @@ public class GPSLocator : MonoBehaviour {
 
         water_level += 1 + water_level * 0.1f;
         water_level = Mathf.Clamp(water_level, 0, 1000);
-        waterLevelText.text = water_level.ToString("0.00");
+        waterLevelText.text = water_level.ToString("0");
 
     }
 
@@ -76,6 +76,15 @@ public class GPSLocator : MonoBehaviour {
     bool gridOutdated = false;
 	// Update is called once per frame
 	void Update () {
+
+        int newWaterLevel = 0;
+        if (int.TryParse(waterLevelText.text, out newWaterLevel))
+        {
+
+            water_level = newWaterLevel;
+
+        }
+        else waterLevelText.text = water_level.ToString("0");
 
         scoreText.text = Player.GetScore().ToString();
 
