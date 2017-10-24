@@ -107,7 +107,8 @@ public class Player : MonoBehaviour {
             charging = false;
 
             Vector3 targetPos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance));
-            Shoot(targetPos - transform.position, chargeMeter * 6);
+            if(chargeMeter > 0.05)
+                Shoot(targetPos - transform.position, chargeMeter * 6);
 
         }
 
