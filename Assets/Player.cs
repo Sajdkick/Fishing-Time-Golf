@@ -40,7 +40,7 @@ public class Player : MonoBehaviour {
 
             int layer_mask = LayerMask.GetMask("Player");
             //layer_mask = ~layer_mask;
-            if (Physics.Raycast(ray, out hit, layer_mask))
+            if (Physics.Raycast(ray, out hit, 10, layer_mask))
             {
                 if (hit.transform.gameObject.name == gameObject.name)
                 {
@@ -53,7 +53,7 @@ public class Player : MonoBehaviour {
             }
 
         }
-        if ( Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0))
         {
 
             if (charging)
