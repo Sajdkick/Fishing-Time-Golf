@@ -9,7 +9,7 @@ public class School : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+        GetComponent<SphereCollider>().isTrigger = true;
 	}
 
     float minDistance = -1;
@@ -42,10 +42,10 @@ public class School : MonoBehaviour {
 
 	}
 
-    void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider collider)
     {
 
-        if(collision.gameObject.tag == "ball")
+        if(collider.gameObject.tag == "ball")
         {
 
             Player.GivePoint(1);
