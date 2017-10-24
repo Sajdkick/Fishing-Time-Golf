@@ -108,7 +108,8 @@ public class CameraController : MonoBehaviour {
 
             //We calculate the new position of what we're dragging.
             float unitsPerPixel = Vector3.Distance(Camera.main.ViewportToWorldPoint(new Vector3(0, 0, transform.position.z)), Camera.main.ViewportToWorldPoint(new Vector3(1, 0, transform.position.z))) / Screen.width;
-            Vector3 newPosition = transform.position + (oldMousePosition - Input.mousePosition) * unitsPerPixel;
+            Vector3 delta = (oldMousePosition - Input.mousePosition) * unitsPerPixel;
+            Vector3 newPosition = transform.position + transform.right * delta.x + transform.up * delta.y;
             oldMousePosition = Input.mousePosition;
 
             float X = newPosition.x;
