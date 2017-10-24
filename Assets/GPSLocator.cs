@@ -26,9 +26,6 @@ public class GPSLocator : MonoBehaviour {
     Text waterLevelText;
     Text scoreText;
 
-    Material obstacleMaterial;
-    Material schoolMaterial;
-
     // Use this for initialization
     void Start () {
 
@@ -55,11 +52,6 @@ public class GPSLocator : MonoBehaviour {
 
         waterLevelText = GUIManager.CreateText(canvas, 0.1f, 0.4f, 0.1f, 0.1f, water_level.ToString("0.00"), "Water Level", "LemonMilkbold", 15).GetComponent<Text>();
         scoreText = GUIManager.CreateText(canvas, 0.5f, 0.85f, 0.1f, 0.2f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
-
-        obstacleMaterial = new Material(Shader.Find("Unlit/Color"));
-        obstacleMaterial.color = Color.black;
-        schoolMaterial = new Material(Shader.Find("Unlit/Color"));
-        schoolMaterial.color = Color.yellow;
 
     }
 
@@ -102,6 +94,9 @@ public class GPSLocator : MonoBehaviour {
                 foreach (TileObject tile in allTiles)
                 {
 
+                    if(tile.GetComponent<WaterObjectTile>() == null)
+                        tile.gameObject.AddComponent<WaterObjectTile>().Initialize(tile.tileID);
+
                     FillWater(tile, water_level);
 
                 }
@@ -140,27 +135,28 @@ public class GPSLocator : MonoBehaviour {
         tile.DisplayTexture.Resize(mapMat.width(), mapMat.height());
         Utils.matToTexture2D(mapMat, tile.DisplayTexture);
 
-        Vector3 tileCorner = tile.transform.position - Vector3.right * 0.5f - Vector3.up * 0.5f;
-        Random.InitState(tile.tileID.GetHashCode());
-
-        //We remove all the obstacles.
-        for(int i = 0; i < tile.tileQuad.transform.childCount; i++)
-            Destroy(tile.tileQuad.transform.GetChild(i).gameObject);
-
         Core.transpose(mapMat, mapMat);
+
+        WaterObjectTile waterObjectTile = tile.gameObject.GetComponent<WaterObjectTile>();
         //We generate all the obstacles.
-        for(int i = 0; i < 20; i++)
+        for(int i = 0; i < waterObjectTile.waterObjects.Count; i++)
         {
 
-            int x = Random.Range(0, 255);
-            int y = Random.Range(0, 255);
+            int x = waterObjectTile.waterObjects[i].x;
+            int y = waterObjectTile.waterObjects[i].y;
 
             byte[] matElement = new byte[3];
             mapMat.get(x, y, matElement);
             if(matElement[0] == 0 && matElement[1] == 0 && matElement[2] == 255)
             {
 
-                SpawnWaterObject(tile, tileCorner + new Vector3(x / 255.0f, 1 - (y / 255.0f), 0));
+                waterObjectTile.waterObjects[i].gameObject.SetActive(true);
+
+            }
+            else
+            {
+
+                waterObjectTile.waterObjects[i].gameObject.SetActive(false);
 
             }
 
@@ -168,35 +164,6 @@ public class GPSLocator : MonoBehaviour {
 
         mapMat.release();
         waterRegion.release();
-
-    }
-
-    void SpawnWaterObject(TileObject tile, Vector3 position)
-    {
-
-        GameObject waterObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        waterObject.transform.position = position;
-        waterObject.transform.localScale *= 0.05f;
-        waterObject.transform.parent = tile.tileQuad.transform;
-
-        Rigidbody rigidbody = waterObject.AddComponent<Rigidbody>();
-        rigidbody.constraints = RigidbodyConstraints.FreezeAll;
-        rigidbody.useGravity = false;
-        rigidbody.isKinematic = true;
-
-        if (Random.Range(1, 10) == 9)
-        {
-
-            waterObject.GetComponent<MeshRenderer>().material = schoolMaterial;
-            waterObject.AddComponent<School>();
-
-        }
-        else
-        {
-
-            waterObject.GetComponent<MeshRenderer>().material = obstacleMaterial;
-
-        }
 
     }
 

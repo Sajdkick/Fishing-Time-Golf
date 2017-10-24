@@ -5,6 +5,7 @@ using UnityEngine;
 public class School : MonoBehaviour {
 
     public float fleeChance = 0.75f;
+    public WaterObjectTile tile;
 
 	// Use this for initialization
 	void Start () {
@@ -33,7 +34,7 @@ public class School : MonoBehaviour {
             float threshold = Mathf.Lerp(0, fleeChance, 1 - (minDistance / 0.3f));
             Debug.Log(diceRoll + " : " + threshold);
             if (diceRoll < threshold)
-                Destroy(gameObject);
+                Remove();
 
             minDistance = -1;
 
@@ -48,9 +49,17 @@ public class School : MonoBehaviour {
         {
 
             Player.GivePoint(1);
-            Destroy(gameObject);
+            Remove();
 
         }
+
+    }
+
+    void Remove()
+    {
+
+        tile.RemoveObject(gameObject);
+        Destroy(gameObject);
 
     }
 
