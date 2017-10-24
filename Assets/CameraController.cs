@@ -32,6 +32,11 @@ public class CameraController : MonoBehaviour {
     /// </summary>
     public bool zoomEnabled = true;
 
+    /// <summary>
+    /// The object which we rotate around, if null we use the camera.
+    /// </summary>
+    public GameObject pivotObject;
+
     //Internal variables used for calculations.
     Vector3 oldMousePosition;
     int touchCount = 0;
@@ -58,15 +63,16 @@ public class CameraController : MonoBehaviour {
             touchCount = 0;
 
         //We handle input differently on mobile and desktop.
-        if (Application.isMobilePlatform)
+        if (Application.isMobilePlatform || Input.touchSupported)
         {
             if (touchCount == 1)
             {
                 Drag();
             }
-            else if (touchCount == 2 && Input.touchCount == 2 && zoomEnabled)
+            else if (touchCount == 2 && Input.touchCount == 2)
             {
-                Zoom();
+                if(zoomEnabled)
+                    Zoom();
                 Rotate();
             }
         }
@@ -223,7 +229,9 @@ public class CameraController : MonoBehaviour {
                 xAngle = xAngTemp + (secondpoint.x - firstpoint.x) * 180.0f / Screen.width;
                 yAngle = yAngTemp - (secondpoint.y - firstpoint.y) * 90.0f / Screen.height;
                 //Rotate camera
-                this.transform.rotation = Quaternion.Euler(0, 0, xAngle);
+                if(pivotObject == null)
+                    transform.rotation = Quaternion.Euler(0, 0, xAngle);
+                else pivotObject.transform.rotation = Quaternion.Euler(0, 0, xAngle);
             }
         }
     }

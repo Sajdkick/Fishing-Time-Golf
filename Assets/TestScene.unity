@@ -350,7 +350,8 @@ MonoBehaviour:
   lockY: 0
   limitX: {x: 0, y: 0}
   limitY: {x: 0, y: 0}
-  zoomEnabled: 1
+  zoomEnabled: 0
+  pivotObject: {fileID: 535400389}
 --- !u!1 &575586591
 GameObject:
   m_ObjectHideFlags: 0
