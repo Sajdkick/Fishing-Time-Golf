@@ -69,13 +69,7 @@ public class CameraController : MonoBehaviour {
             //We set the initial value of oldMousePosition.
             oldMousePosition = Input.mousePosition;
 
-            //We cast a ray that intersects with everything but the background.
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            LayerMask mask = 1 << 9;
-            mask = ~mask;
-
-            //If we didn't collide with anything, we know we want to start dragging.
-            drag = !Physics.Raycast(ray, 100, mask);
+            drag = true;
             
         }
         else if (drag && Input.GetMouseButton(0))

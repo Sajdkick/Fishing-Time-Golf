@@ -25,6 +25,7 @@ public class GPSLocator : MonoBehaviour {
 
     InputField waterLevelText;
     Text scoreText;
+    Text ballText;
 
     // Use this for initialization
     void Start () {
@@ -40,7 +41,7 @@ public class GPSLocator : MonoBehaviour {
         LerpPosition lerp = player.AddComponent<LerpPosition>();
         lerp.target = gpsLocationObject;
         lerp.t = 0.1f;
-        lerp.maxDistance = 10;
+        lerp.maxDistance = 0.1f;
 
         //We create the gui
         GameObject canvas = GUIManager.CreateCanvas("Canvas");
@@ -52,6 +53,7 @@ public class GPSLocator : MonoBehaviour {
 
         waterLevelText = GUIManager.CreateInputTextfield(canvas, 0.5f, 0.15f, 0.3f, 0.1f, "Water Level", water_level.ToString("0.00"), "LemonMilkbold").GetComponent<InputField>();
         scoreText = GUIManager.CreateText(canvas, 0.5f, 0.85f, 0.1f, 0.2f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
+        ballText = GUIManager.CreateText(canvas, 0.25f, 0.85f, 0.1f, 0.1f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
 
     }
 
@@ -79,12 +81,19 @@ public class GPSLocator : MonoBehaviour {
 
         int newWaterLevel = 0;
         if (int.TryParse(waterLevelText.text, out newWaterLevel))
-        {
-
             water_level = newWaterLevel;
-
-        }
         else waterLevelText.text = water_level.ToString("0");
+
+        if (Player.GetActiveBall() != null)
+        {
+            ballText.text = "wait";
+            ballText.color = Color.red;   
+        }
+        else
+        {
+            ballText.text = "ready";
+            ballText.color = Color.green;
+        }
 
         scoreText.text = Player.GetScore().ToString();
 

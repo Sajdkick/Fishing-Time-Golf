@@ -31,7 +31,7 @@ public class Player : MonoBehaviour {
 
     bool charging = false;
     float chargeMeter = 0;
-    float doubleClickTimer = -1;
+    float chargeLength = 0.75f;
     Vector3 startChargePosition;
 	// Update is called once per frame
 	void Update () {
@@ -79,14 +79,14 @@ public class Player : MonoBehaviour {
             {
 
                 lineRenderer.SetPosition(0, startChargePosition);
-                Vector3 pos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance - 0.1f));
+                Vector3 pos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance));
 
-                chargeMeter = Mathf.Clamp(Vector3.Distance(startChargePosition, pos), 0, 0.5f);
+                chargeMeter = Mathf.Clamp(Vector3.Distance(startChargePosition, pos), 0, chargeLength);
 
-                Color chargeColor = Color.Lerp(Color.green, Color.red, chargeMeter / 0.5f);
+                Color chargeColor = Color.Lerp(Color.green, Color.red, chargeMeter / chargeLength);
 
                 lineRenderer.material.color = chargeColor;
-                lineRenderer.SetPosition(1, startChargePosition + (pos - startChargePosition).normalized * chargeMeter);
+                lineRenderer.SetPosition(1, startChargePosition + (pos - startChargePosition).normalized * chargeMeter - Vector3.forward * 0.1f);
 
             }
 
@@ -101,8 +101,9 @@ public class Player : MonoBehaviour {
             charging = false;
 
             Vector3 targetPos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance));
-            if(chargeMeter > 0.05)
-                Shoot(startChargePosition - targetPos, chargeMeter * 6);
+            Debug.Log((chargeMeter / chargeLength));
+            if((chargeMeter / chargeLength) > 0.2f)
+                Shoot(startChargePosition - targetPos, (chargeMeter / chargeLength));
 
         }
 
@@ -126,7 +127,9 @@ public class Player : MonoBehaviour {
         activeBall = ball;
 
     }
-    
+
+    float doubleClickTimer = -1;
+    float doubleClickTime = 0.25f;
     bool DoubleClick()
     {
 
@@ -135,7 +138,7 @@ public class Player : MonoBehaviour {
 
             if (doubleClickTimer == -1)
                 doubleClickTimer = Time.deltaTime;
-            else if (doubleClickTimer < 0.5f)
+            else if (doubleClickTimer < doubleClickTime)
             {
 
                 doubleClickTimer = -1;
@@ -147,7 +150,7 @@ public class Player : MonoBehaviour {
 
         if (doubleClickTimer != -1)
             doubleClickTimer += Time.deltaTime;
-        if (doubleClickTimer > 0.5f)
+        if (doubleClickTimer > doubleClickTime)
             doubleClickTimer = -1;
 
         return false;
