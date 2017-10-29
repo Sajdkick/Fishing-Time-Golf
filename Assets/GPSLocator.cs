@@ -53,7 +53,7 @@ public class GPSLocator : MonoBehaviour {
 
         waterLevelText = GUIManager.CreateInputTextfield(canvas, 0.5f, 0.15f, 0.3f, 0.1f, "Water Level", water_level.ToString("0.00"), "LemonMilkbold").GetComponent<InputField>();
         scoreText = GUIManager.CreateText(canvas, 0.5f, 0.85f, 0.1f, 0.2f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
-        ballText = GUIManager.CreateText(canvas, 0.25f, 0.85f, 0.1f, 0.1f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
+        ballText = GUIManager.CreateText(canvas, 0.25f, 0.85f, 0.075f, 0.075f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
 
     }
 
