@@ -181,7 +181,7 @@ public class CameraController : MonoBehaviour {
                 if (direction == -1)
                     zAngle = (oldMousePosition.x - Input.mousePosition.x) * 180.0f / Screen.width;
                 else zAngle = (Input.mousePosition.x - oldMousePosition.x) * 180.0f / Screen.width;
-                Debug.Log(oldMousePosition.x + " : " + Input.mousePosition.x);
+
                 //Rotate camera
                 pivotObject.transform.Rotate(0,0,zAngle);
 
