@@ -8,6 +8,7 @@ public class Ball : MonoBehaviour {
 	void Start () {
 
         gameObject.tag = "ball";
+        gameObject.GetComponent<SphereCollider>().material = Resources.Load("Ball") as PhysicMaterial;
 
 	}
 

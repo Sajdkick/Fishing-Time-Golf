@@ -129,6 +129,8 @@ public class WaterObjectTile : MonoBehaviour{
         rigidbody.useGravity = false;
         rigidbody.isKinematic = true;
 
+        waterObject.GetComponent<SphereCollider>().material = Resources.Load("Obstacle") as PhysicMaterial;
+
         waterObject.GetComponent<MeshRenderer>().material = obstacleMaterial;
 
         return waterObject;
