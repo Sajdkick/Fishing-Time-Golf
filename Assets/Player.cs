@@ -129,7 +129,7 @@ public class Player : MonoBehaviour {
     
     bool DoubleClick()
     {
-        Debug.Log(doubleClickTimer);
+
         if (Input.GetMouseButtonDown(0))
         {
 

@@ -46,48 +46,14 @@ public class CameraController : MonoBehaviour {
     void Start()
     {
 
-        //Initialization our angles of camera
-        xAngle = 0.0f;
-        yAngle = 0.0f;
-        this.transform.rotation = Quaternion.Euler(yAngle, xAngle, 0.0f);
-
     }
 
     // Update is called once per frame
     void Update () {
 
-
-
         //Here we make sure that we only can go up in touch count, only way to go down is to go directly to zero.
         //This makes sure that we dont start to drag the camera if we lift a finger after zooming.
-        if (Input.touchCount > touchCount)
-            touchCount = Input.touchCount;
-        else if (Input.touchCount == 0)
-            touchCount = 0;
-
-        //We handle input differently on mobile and desktop.
-        if (Application.isMobilePlatform)
-        {
-            if (touchCount == 1)
-            {
-                Drag();
-            }
-            else if (touchCount == 2 && Input.touchCount == 2)
-            {
-                if (zoomEnabled)
-                    Zoom();
-                Rotate();
-            }
-        }
-        else
-        {
-
-            Rotate();
-            Drag();
-            if (zoomEnabled)
-                Zoom();
-
-        }
+        Drag();
 
     }
 
@@ -112,7 +78,6 @@ public class CameraController : MonoBehaviour {
             drag = !Physics.Raycast(ray, 100, mask);
             
         }
-        
         else if (drag && Input.GetMouseButton(0))
         {
 
@@ -120,32 +85,9 @@ public class CameraController : MonoBehaviour {
             float unitsPerPixel = Vector3.Distance(Camera.main.ViewportToWorldPoint(new Vector3(0, 0, transform.position.z)), Camera.main.ViewportToWorldPoint(new Vector3(1, 0, transform.position.z))) / Screen.width;
             Vector3 delta = (oldMousePosition - Input.mousePosition) * unitsPerPixel;
             Vector3 newPosition = transform.position + transform.up * delta.y;
-            oldMousePosition = Input.mousePosition;
 
             float X = newPosition.x;
             float Y = newPosition.y;
-
-            //We check if we want to lock any axes.
-            if (lockX)
-                X = transform.position.x;
-            if (lockY)
-                Y = transform.position.y;
-
-            //If limitX == (0,0) it's unlimited.
-            if (limitX.magnitude != 0)
-            {
-
-                //We clamp the X value between the limits.
-                Mathf.Clamp(X, limitX.x, limitX.y);
-
-            }
-
-            if (limitY.magnitude != 0)
-            {
-
-                Mathf.Clamp(Y, limitY.x, limitY.y);
-
-            }
 
             //We set the position.
             transform.position = new Vector3(X, Y, transform.position.z);
@@ -156,6 +98,12 @@ public class CameraController : MonoBehaviour {
                 Vector3 pivotInViewport = GetComponent<Camera>().WorldToViewportPoint(pivotObject.transform.position);
                 if (pivotInViewport.x > 1 || pivotInViewport.x < 0 || pivotInViewport.y > 1 || pivotInViewport.y < 0)
                     transform.position = oldCameraPosition;
+                else
+                {
+
+                    Rotate();
+
+                }
 
             }
 
@@ -164,6 +112,7 @@ public class CameraController : MonoBehaviour {
         else if (drag && Input.GetMouseButtonUp(0))
             drag = false;
 
+        oldMousePosition = Input.mousePosition;
         oldCameraPosition = transform.position;
 
     }
@@ -218,36 +167,30 @@ public class CameraController : MonoBehaviour {
 
     }
 
-    private Vector3 firstpoint;
-    private Vector3 secondpoint;
-    private float xAngle = 0.0f; 
-    private float yAngle = 0.0f;
-    private float xAngTemp = 0.0f;
-    private float yAngTemp = 0.0f;
+    private float zAngle = 0.0f; 
+    private float zAngTemp = 0.0f;
     void Rotate()
     {
-        //Check count touches
-        if (Input.touchCount > 0)
+
+        //Move finger by screen
+        if (Input.GetMouseButton(0))
         {
-            //Touch began, save position
-            if (Input.GetTouch(0).phase == TouchPhase.Began)
+
+            if (oldMousePosition != Input.mousePosition)
             {
-                firstpoint = Input.GetTouch(0).position;
-                xAngTemp = xAngle;
-                yAngTemp = yAngle;
-            }
-            //Move finger by screen
-            if (Input.GetTouch(0).phase == TouchPhase.Moved)
-            {
-                secondpoint = Input.GetTouch(0).position;
-                float direction = Mathf.Sign(Camera.main.ScreenToWorldPoint(new Vector3(secondpoint.x, secondpoint.y, 2)).y - pivotObject.transform.position.y);
+
+                Vector3 mousePoint = Camera.main.ScreenToWorldPoint(new Vector3(oldMousePosition.x, oldMousePosition.y, pivotObject.transform.position.z));
+                Vector3 pivotToMouse = mousePoint - pivotObject.transform.position;
+                float direction = Mathf.Sign(Vector3.Dot(pivotToMouse, Camera.main.transform.up));
                 //Mainly, about rotate camera. For example, for Screen.width rotate on 180 degree
-                xAngle = xAngTemp + (secondpoint.x - firstpoint.x) * 180.0f / Screen.width;
-                yAngle = yAngTemp - (secondpoint.y - firstpoint.y) * 90.0f / Screen.height;
+
+                if (direction == -1)
+                    zAngle = (oldMousePosition.x - Input.mousePosition.x) * 180.0f / Screen.width;
+                else zAngle = (Input.mousePosition.x - oldMousePosition.x) * 180.0f / Screen.width;
+                Debug.Log(oldMousePosition.x + " : " + Input.mousePosition.x);
                 //Rotate camera
-                if(pivotObject == null)
-                    transform.rotation = Quaternion.Euler(0, 0, xAngle);
-                else pivotObject.transform.rotation = Quaternion.Euler(0, 0, direction * xAngle);
+                pivotObject.transform.Rotate(0,0,zAngle);
+
             }
         }
     }
