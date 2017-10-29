@@ -12,7 +12,7 @@ public class Compass : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        transform.rotation.SetLookRotation(transform.position + transform.up);
+        transform.LookAt(transform.position + Vector3.up);
 
 	}
 }
