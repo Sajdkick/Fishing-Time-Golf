@@ -138,8 +138,14 @@ public class GPSLocator : MonoBehaviour {
         Utils.texture2DToMat(tile.originalMapTexture, mapMat);
 
         Mat waterRegion = new Mat();
-        Core.compare(tile.heightMap, new Scalar(waterLevel), waterRegion, Core.CMP_LE);
-
+        Mat tempHeight = new Mat(tile.heightMap.size(), tile.heightMap.type());
+        tile.heightMap.copyTo(tempHeight);
+        Mat noise = new Mat(tempHeight.size(), tempHeight.type());
+        Core.setRNGSeed(tile.GetHashCode());
+        Core.randn(noise, 2f, 1f);
+        tempHeight += noise;
+        Core.compare(tempHeight, new Scalar(waterLevel), waterRegion, Core.CMP_LE);
+        
         Imgproc.pyrDown(waterRegion, waterRegion);
         Imgproc.pyrDown(waterRegion, waterRegion);
         Imgproc.pyrDown(waterRegion, waterRegion);
