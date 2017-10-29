@@ -133,6 +133,8 @@ public class GPSLocator : MonoBehaviour {
 
         Imgproc.pyrDown(waterRegion, waterRegion);
         Imgproc.pyrDown(waterRegion, waterRegion);
+        Imgproc.pyrDown(waterRegion, waterRegion);
+        Imgproc.pyrUp(waterRegion, waterRegion);
         Imgproc.pyrUp(waterRegion, waterRegion);
         Imgproc.pyrUp(waterRegion, waterRegion);
 
