@@ -26,6 +26,10 @@ public class GPSLocator : MonoBehaviour {
     InputField waterLevelText;
     Text scoreText;
     Text ballText;
+    Button menuButton;
+    Button leftButton;
+    Button rightButton;
+
 
     // Use this for initialization
     void Start () {
@@ -47,13 +51,18 @@ public class GPSLocator : MonoBehaviour {
         GameObject canvas = GUIManager.CreateCanvas("Canvas");
 
         Texture2D down = Resources.Load<Texture2D>("UI Elements/Black/2x/left");
-        GUIManager.CreateButton(canvas, 0.15f, 0.15f, 0.1f, 0.1f, down, "Left Button", (data) => LowerWaterLevel(data));
+        leftButton = GUIManager.CreateButton(canvas, 0.15f, 0.15f, 0.1f, 0.1f, down, "Left Button", (data) => LowerWaterLevel(data)).GetComponent<Button>();
         Texture2D up = Resources.Load<Texture2D>("UI Elements/Black/2x/right");
-        GUIManager.CreateButton(canvas, 0.85f, 0.15f, 0.1f, 0.1f, up, "Right Button", (data) => RiseWaterLevel(data));
+        rightButton = GUIManager.CreateButton(canvas, 0.85f, 0.15f, 0.1f, 0.1f, up, "Right Button", (data) => RiseWaterLevel(data)).GetComponent<Button>();
+
+        Texture2D menu = Resources.Load<Texture2D>("UI Elements/Black/2x/hamburger icon");
+        menuButton = GUIManager.CreateButton(canvas, 0.5f, 0.03f, 0.05f, 0.05f, menu, "Menu Button", (data) => ToggleMenu(data)).GetComponent<Button>();
 
         waterLevelText = GUIManager.CreateInputTextfield(canvas, 0.5f, 0.15f, 0.3f, 0.1f, "Water Level", water_level.ToString("0.00"), "LemonMilkbold").GetComponent<InputField>();
         scoreText = GUIManager.CreateText(canvas, 0.5f, 0.85f, 0.1f, 0.2f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
         ballText = GUIManager.CreateText(canvas, 0.25f, 0.85f, 0.075f, 0.075f, Player.GetScore().ToString(), "Score", "LemonMilkbold", 15).GetComponent<Text>();
+
+        ToggleMenu(null);
 
     }
 
@@ -73,7 +82,16 @@ public class GPSLocator : MonoBehaviour {
         waterLevelText.text = water_level.ToString("0");
 
     }
+    void ToggleMenu(UnityEngine.EventSystems.PointerEventData data)
+    {
 
+        bool toggle = !waterLevelText.gameObject.activeInHierarchy;
+
+        waterLevelText.transform.parent.gameObject.SetActive(toggle);
+        leftButton.gameObject.SetActive(toggle);
+        rightButton.gameObject.SetActive(toggle);
+
+    }
     float old_water_level = 0;
     bool gridOutdated = true;
 	// Update is called once per frame
