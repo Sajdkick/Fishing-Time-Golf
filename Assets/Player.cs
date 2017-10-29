@@ -20,8 +20,8 @@ public class Player : MonoBehaviour {
         lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
         lineRenderer.material.color = Color.green;
         lineRenderer.widthMultiplier = 0.075f;
-        lineRenderer.startWidth = 0.075f;
-        lineRenderer.endWidth = 0;
+        lineRenderer.startWidth = 0;
+        lineRenderer.endWidth = 0.075f;
         lineRenderer.positionCount = 2;
 
         lineRenderer.SetPosition(0, Vector3.zero);
@@ -31,51 +31,45 @@ public class Player : MonoBehaviour {
 
     bool charging = false;
     float chargeMeter = 0;
+    float doubleClickTimer = -1;
+    Vector3 startChargePosition;
 	// Update is called once per frame
 	void Update () {
 
         float cameraDistance = Mathf.Abs(Camera.main.transform.position.z);
 
-        if (!charging && Input.GetMouseButtonDown(0) && activeBall == null)
+        if (!charging && DoubleClick() && activeBall == null)
         {
             RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             int layer_mask = LayerMask.GetMask("Player");
-            //layer_mask = ~layer_mask;
-            if (Physics.Raycast(ray, out hit, 10, layer_mask))
+
+            if(Physics.Raycast(transform.position + -Vector3.forward, Vector3.forward, out hit, 10, ~layer_mask))
             {
-                if (hit.transform.gameObject.name == gameObject.name)
+
+                if(hit.collider.gameObject.layer == 9)
                 {
 
-                    if(Physics.Raycast(transform.position + -Vector3.forward, Vector3.forward, out hit, 10, ~layer_mask))
+                    Renderer rend = hit.transform.GetComponent<Renderer>();
+                    Texture2D tex = rend.material.mainTexture as Texture2D;
+                    Vector3 pixelUV = hit.textureCoord;
+                    pixelUV.x *= tex.width;
+                    pixelUV.y *= tex.height;
+
+                    Color color = tex.GetPixel((int)pixelUV.x, (int)pixelUV.y);
+                    if(color != Color.blue)
                     {
 
-                        if(hit.collider.gameObject.layer == 9)
-                        {
-
-                            Renderer rend = hit.transform.GetComponent<Renderer>();
-                            Texture2D tex = rend.material.mainTexture as Texture2D;
-                            Vector3 pixelUV = hit.textureCoord;
-                            pixelUV.x *= tex.width;
-                            pixelUV.y *= tex.height;
-
-                            Color color = tex.GetPixel((int)pixelUV.x, (int)pixelUV.y);
-                            if(color != Color.blue)
-                            {
-
-                                charging = true;
-                                Camera.main.GetComponent<CameraController>().enabled = false;
-
-                            }
-
-                        }
+                        charging = true;
+                        startChargePosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance));
+                        Camera.main.GetComponent<CameraController>().enabled = false;
 
                     }
 
                 }
-                    
+
             }
+
 
         }
         if (Input.GetMouseButton(0))
@@ -84,15 +78,15 @@ public class Player : MonoBehaviour {
             if (charging)
             {
 
-                lineRenderer.SetPosition(0, transform.position);
+                lineRenderer.SetPosition(0, startChargePosition);
                 Vector3 pos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance - 0.1f));
 
-                chargeMeter = Mathf.Clamp(Vector3.Distance(transform.position, pos), 0, 0.5f);
+                chargeMeter = Mathf.Clamp(Vector3.Distance(startChargePosition, pos), 0, 0.5f);
 
                 Color chargeColor = Color.Lerp(Color.green, Color.red, chargeMeter / 0.5f);
 
                 lineRenderer.material.color = chargeColor;
-                lineRenderer.SetPosition(1, transform.position + (pos - transform.position).normalized * chargeMeter);
+                lineRenderer.SetPosition(1, startChargePosition + (pos - startChargePosition).normalized * chargeMeter);
 
             }
 
@@ -108,7 +102,7 @@ public class Player : MonoBehaviour {
 
             Vector3 targetPos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance));
             if(chargeMeter > 0.05)
-                Shoot(targetPos - transform.position, chargeMeter * 6);
+                Shoot(startChargePosition - targetPos, chargeMeter * 6);
 
         }
 
@@ -130,6 +124,33 @@ public class Player : MonoBehaviour {
         ball.AddComponent<Ball>();
    
         activeBall = ball;
+
+    }
+    
+    bool DoubleClick()
+    {
+        Debug.Log(doubleClickTimer);
+        if (Input.GetMouseButtonDown(0))
+        {
+
+            if (doubleClickTimer == -1)
+                doubleClickTimer = Time.deltaTime;
+            else if (doubleClickTimer < 0.5f)
+            {
+
+                doubleClickTimer = -1;
+                return true;
+
+            }
+
+        }
+
+        if (doubleClickTimer != -1)
+            doubleClickTimer += Time.deltaTime;
+        if (doubleClickTimer > 0.5f)
+            doubleClickTimer = -1;
+
+        return false;
 
     }
 

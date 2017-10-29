@@ -56,6 +56,8 @@ public class CameraController : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
+
+
         //Here we make sure that we only can go up in touch count, only way to go down is to go directly to zero.
         //This makes sure that we dont start to drag the camera if we lift a finger after zooming.
         if (Input.touchCount > touchCount)
@@ -72,7 +74,7 @@ public class CameraController : MonoBehaviour {
             }
             else if (touchCount == 2 && Input.touchCount == 2)
             {
-                if(zoomEnabled)
+                if (zoomEnabled)
                     Zoom();
                 Rotate();
             }
@@ -80,6 +82,7 @@ public class CameraController : MonoBehaviour {
         else
         {
 
+            Rotate();
             Drag();
             if (zoomEnabled)
                 Zoom();
@@ -116,7 +119,7 @@ public class CameraController : MonoBehaviour {
             //We calculate the new position of what we're dragging.
             float unitsPerPixel = Vector3.Distance(Camera.main.ViewportToWorldPoint(new Vector3(0, 0, transform.position.z)), Camera.main.ViewportToWorldPoint(new Vector3(1, 0, transform.position.z))) / Screen.width;
             Vector3 delta = (oldMousePosition - Input.mousePosition) * unitsPerPixel;
-            Vector3 newPosition = transform.position + transform.right * delta.x + transform.up * delta.y;
+            Vector3 newPosition = transform.position + transform.up * delta.y;
             oldMousePosition = Input.mousePosition;
 
             float X = newPosition.x;
@@ -237,13 +240,14 @@ public class CameraController : MonoBehaviour {
             if (Input.GetTouch(0).phase == TouchPhase.Moved)
             {
                 secondpoint = Input.GetTouch(0).position;
+                float direction = Mathf.Sign(Camera.main.ScreenToWorldPoint(new Vector3(secondpoint.x, secondpoint.y, 2)).y - pivotObject.transform.position.y);
                 //Mainly, about rotate camera. For example, for Screen.width rotate on 180 degree
                 xAngle = xAngTemp + (secondpoint.x - firstpoint.x) * 180.0f / Screen.width;
                 yAngle = yAngTemp - (secondpoint.y - firstpoint.y) * 90.0f / Screen.height;
                 //Rotate camera
                 if(pivotObject == null)
                     transform.rotation = Quaternion.Euler(0, 0, xAngle);
-                else pivotObject.transform.rotation = Quaternion.Euler(0, 0, xAngle);
+                else pivotObject.transform.rotation = Quaternion.Euler(0, 0, direction * xAngle);
             }
         }
     }
