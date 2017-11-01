@@ -176,7 +176,7 @@ public class MapGrid {
 
         TileObject closestTile = grid[0, 0];
         double minDistance = double.MaxValue;
-        foreach(TileObject tile in grid)
+        foreach (TileObject tile in grid)
         {
 
             Vector2d coords = Conversions.TileIdToCenterLatitudeLongitude(tile.tileID.X, tile.tileID.Y, tile.tileID.Z);
@@ -184,6 +184,26 @@ public class MapGrid {
             {
                 closestTile = tile;
                 minDistance = (targetCoords - coords).magnitude;
+            }
+
+        }
+
+        return closestTile;
+
+    }
+    public TileObject GetClosestTileFromPosition(Vector3 position)
+    {
+
+        TileObject closestTile = grid[0, 0];
+        double minDistance = double.MaxValue;
+        foreach (TileObject tile in grid)
+        {
+
+            Vector3 tilePosition = tile.transform.position;
+            if ((position - tilePosition).magnitude < minDistance)
+            {
+                closestTile = tile;
+                minDistance = (position - tilePosition).magnitude;
             }
 
         }
@@ -214,8 +234,23 @@ public class MapGrid {
         Vector2d pixelOffset = meterOffset / tileScale;
         Vector2d worldOffset = pixelOffset / 256.0f;
 
-        return closestTile.transform.position + new Vector3((float)worldOffset.x/2, (float)worldOffset.y/2, 0);
-        
+        return closestTile.transform.position + new Vector3((float)worldOffset.x / 2, (float)worldOffset.y / 2, 0);
+
+    }
+    public Vector2d Position_To_Coordinate(Vector3 position)
+    {
+
+        TileObject closestTile = GetClosestTileFromPosition(position);
+        UnwrappedTileId closestTileId = closestTile.tileID;
+        Vector2d centerCoords = Conversions.TileIdToCenterLatitudeLongitude(closestTileId.X, closestTileId.Y, closestTileId.Z);
+        Vector3 unityOffset = (position - closestTile.transform.position);
+        Vector2 pixelOffset = new Vector2(unityOffset.x * 256, unityOffset.y * 256);
+
+        float tileScale = Conversions.GetTileScaleInMeters((float)centerCoords.x, zoom);
+        Vector2d meterOffset = new Vector2d(pixelOffset.x * tileScale, pixelOffset.y * tileScale);
+
+        return Conversions.MetersToLatLon(Conversions.LatLonToMeters(centerCoords) + meterOffset);
+
     }
 
     public void ShiftX(int x)

@@ -16,13 +16,13 @@ public class School : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		
-        if(Player.GetActiveBall() != null)
+        if(Player.player.GetActiveBall() != null)
         {
 
             if(minDistance < 0)
                 minDistance = float.MaxValue;
 
-            float distance = Vector3.Distance(Player.GetActiveBall().transform.position, transform.position);
+            float distance = Vector3.Distance(Player.player.GetActiveBall().transform.position, transform.position);
             if (distance < minDistance)
                 minDistance = distance;
 
@@ -48,7 +48,7 @@ public class School : MonoBehaviour {
         if(collider.gameObject.tag == "ball")
         {
 
-            Player.GivePoint(1);
+            Player.player.GivePoint(1);
             Remove();
 
         }

@@ -4,17 +4,21 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
-    static GameObject activeBall;
-    static public GameObject GetActiveBall() { return activeBall; }
+    static public Player player;
 
-    static int score = 0;
-    static public void GivePoint(int point) { score += point; }
-    static public int GetScore() { return score; }
+    GameObject activeBall;
+    public GameObject GetActiveBall() { return activeBall; }
+
+    int score = 0;
+    public void GivePoint(int point) { score += point; }
+    public int GetScore() { return score; }
 
     LineRenderer lineRenderer;
 
 	// Use this for initialization
 	void Start () {
+
+        player = this;
 
         lineRenderer = gameObject.AddComponent<LineRenderer>();
         lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
@@ -29,7 +33,8 @@ public class Player : MonoBehaviour {
 
     }
 
-    public bool charging = false;
+    bool charging = false;
+    public bool isCharging() { return charging; }
     float chargeMeter = 0;
     float chargeLength = 0.75f;
     Vector3 startChargePosition;
@@ -101,8 +106,8 @@ public class Player : MonoBehaviour {
             charging = false;
 
             Vector3 targetPos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraDistance));
-            Debug.Log((chargeMeter / chargeLength));
-            if((chargeMeter / chargeLength) > 0.2f)
+
+            if ((chargeMeter / chargeLength) > 0.2f)
                 Shoot(startChargePosition - targetPos, (chargeMeter / chargeLength));
 
         }
