@@ -143,7 +143,9 @@ public class GPSLocator : MonoBehaviour {
 
         }
 
-        gpsLocationObject.transform.position = grid.Coordinate_To_Position((float)location.x, (float)location.y);
+        if(!player.GetComponent<Player>().charging)
+            gpsLocationObject.transform.position = grid.Coordinate_To_Position((float)location.x, (float)location.y);
+
         old_water_level = water_level;
         
     }

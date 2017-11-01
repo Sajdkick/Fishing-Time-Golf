@@ -29,7 +29,7 @@ public class Player : MonoBehaviour {
 
     }
 
-    bool charging = false;
+    public bool charging = false;
     float chargeMeter = 0;
     float chargeLength = 0.75f;
     Vector3 startChargePosition;
